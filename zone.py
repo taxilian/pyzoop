@@ -24,7 +24,7 @@ class zone(object):
             try:
                 subZone = getattr(self, "zone_%s" % pathList[0])
                 self.beforeSubZone(subZone, request, pathList)
-                resp = subZone.handleRequest(request, path[1:])
+                resp = subZone.handleRequest(request, "/".join(pathList[1:]))
                 self.afterSubZone(subZone, resp, request, pathList)
                 return resp
             except ZincError as e:
