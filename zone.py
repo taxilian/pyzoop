@@ -55,8 +55,11 @@ class zone(object):
         try:
             self.initPages(member, request, pathList)
             resp = member(request, pathList)
-            self.closePages(member, request, pathList)
-            return resp
+            resp2 = self.closePages(member, request, pathList, resp)
+            if resp2 != None:
+                return resp2
+            else:
+                return resp
         except ZincError as e:
             if settings.DEBUG:
                 raise e
@@ -78,7 +81,7 @@ class zone(object):
     def initPages(self, page, request, pathList):
         pass
 
-    def closePages(self, page, request, pathList):
+    def closePages(self, page, request, pathList, response):
         pass
 
     def page_default(self, request, pathList):
