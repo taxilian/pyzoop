@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.shortcuts import render_to_response
 from django.conf import settings
 from ZincError import *
 
@@ -10,8 +11,13 @@ class zone(object):
         # initialize any zones that were provided
         for name, obj in childZones.iteritems():
             setattr(self, "zone_%s" % name, obj)
+        self.__templateVars = {}
+
+    @property
+    def templateVars(self): return self.__templateVars
 
     def handleRequest(self, request, path):
+        self.__templateVars["user"] = request.user
         if len(path) > 0:
             pathList = path.split("/")
         else:
@@ -86,3 +92,7 @@ class zone(object):
 
     def page_default(self, request, pathList):
         raise ZincError("page_default not implemented by zone!")
+
+    def render_to_response(self, template, vmap):
+        self.templateVars.update(vmap)
+        return render_to_response(template, self.templateVars)
