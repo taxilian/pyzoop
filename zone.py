@@ -18,6 +18,10 @@ class zone(object):
 
     def handleRequest(self, request, path):
         self.__templateVars["user"] = request.user
+        self.__templateVars["get"] = request.GET
+        self.__templateVars["post"] = request.POST
+        self.__templateVars["BASE_URL"] = settings.BASE_URL
+        self.__templateVars["MEDIA_URL"] = settings.MEDIA_URL
         if len(path) > 0:
             pathList = path.split("/")
         else:
