@@ -1,9 +1,11 @@
+from abc import ABCMeta, abstractmethod
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.conf import settings
 from ZincError import *
 
 class zone(object):
+    __metaclass__ = ABCMeta
     """
     Base class for PyZinc Zones
     """
@@ -27,16 +29,20 @@ class zone(object):
         else:
             pathList = ["index"]
 
-        self.initZone(request, path)
+        r = self.initZone(request, path)
+        if isinstance(r, HttpResponse):
+            return r
 
         # pass the request to a subzone, if applicable
         if hasattr(self, "zone_%s" % pathList[0]):
             try:
                 subZone = getattr(self, "zone_%s" % pathList[0])
-                self.beforeSubZone(subZone, request, pathList)
+                r = self.beforeSubZone(subZone, request, pathList)
+                if isinstance(r, HttpResponse):
+                    return r
                 resp = subZone.handleRequest(request, "/".join(pathList[1:]))
-                self.afterSubZone(subZone, resp, request, pathList)
-                return resp
+                r = self.afterSubZone(subZone, resp, request, pathList)
+                return r if isinstance(r, HttpResponse) else resp
             except ZincError as e:
                 if settings.DEBUG:
                     raise e
@@ -44,7 +50,7 @@ class zone(object):
                     if hasattr(self, "error"):
                         return self.error(e)
                     else:
-                        return HttpResponse("And unhandled error occured: %s" % e)
+                        return HttpResponse("An unhandled error occurred: %s" % e)
 
         # handle POST requests
         if request.method == "POST":
@@ -63,7 +69,9 @@ class zone(object):
             member = self.page_default
 
         try:
-            self.initPages(member, request, pathList)
+            r = self.initPages(member, request, pathList)
+            if isinstance(r, HttpResponse):
+                return r
             resp = member(request, pathList)
             resp2 = self.closePages(member, request, pathList, resp)
             if resp2 != None:
@@ -77,25 +85,28 @@ class zone(object):
                 if hasattr(self, "error"):
                     return self.error(e)
                 else:
-                    return HttpResponse("And unhandled error occured: %s" % e)
+                    return HttpResponse("An unhandled error occurred: %s" % e)
 
+    @abstractmethod
     def initZone(self, request, pathList):
         pass
 
-    def beforeSubZone(self, subZone, request, pathList):
+    def beforeSubZone(self, request, subZone, pathList):
         pass
 
-    def afterSubZone(self, subZone, resp, request, pathList):
+    def afterSubZone(self, request, pathList, subZone, response):
         pass
 
-    def initPages(self, page, request, pathList):
+    @abstractmethod
+    def initPages(self, request, pathList, page):
         pass
 
-    def closePages(self, page, request, pathList, response):
+    def closePages(self, request, pathList, page, response):
         pass
 
+    @abstractmethod
     def page_default(self, request, pathList):
-        raise ZincError("page_default not implemented by zone!")
+        pass
 
     def render_to_response(self, template, vmap):
         self.templateVars.update(vmap)
