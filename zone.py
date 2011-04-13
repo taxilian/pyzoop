@@ -52,6 +52,11 @@ class zone(object):
                     else:
                         return HttpResponse("An unhandled error occurred: %s" % e)
 
+        #give initPages the chance to change the pathList if desired
+        r = self.initPages(request, pathList)
+        if isinstance(r, HttpResponse):
+            return r
+
         # handle POST requests
         if request.method == "POST":
             if hasattr(self, "post_%s" % pathList[0]):
@@ -63,18 +68,15 @@ class zone(object):
             else:
                 member = self.page_default
 
-        elif hasattr(self, "page_%s" % pathList[0]):
+        elif pathList and hasattr(self, "page_%s" % pathList[0]):
             member = getattr(self, "page_%s" % pathList[0])
         else:
             member = self.page_default
 
         try:
-            r = self.initPages(member, request, pathList)
-            if isinstance(r, HttpResponse):
-                return r
             resp = member(request, pathList)
-            resp2 = self.closePages(member, request, pathList, resp)
-            if resp2 != None:
+            resp2 = self.closePages(request, pathList, resp)
+            if resp2:
                 return resp2
             else:
                 return resp
@@ -91,22 +93,21 @@ class zone(object):
     def initZone(self, request, pathList):
         pass
 
-    def beforeSubZone(self, request, subZone, pathList):
+    def beforeSubZone(self, request, pathList, subZone):
         pass
 
     def afterSubZone(self, request, pathList, subZone, response):
         pass
 
     @abstractmethod
-    def initPages(self, request, pathList, page):
+    def initPages(self, request, pathList):
         pass
 
-    def closePages(self, request, pathList, page, response):
+    def closePages(self, request, pathList, response):
         pass
 
-    @abstractmethod
     def page_default(self, request, pathList):
-        pass
+        raise Http404
 
     def render_to_response(self, template, vmap):
         self.templateVars.update(vmap)
