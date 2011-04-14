@@ -27,11 +27,11 @@ class urlVars(object):
                 raise Http404
             if not hasattr(request, "zone"):
                 pass
-                request.zone = {}
+                request.zoneVar = {}
             for v in vars:
                 pass
-                request.zone[v] = pathList.pop(0)
-            print request.zone
+                request.zoneVar[v] = pathList.pop(0)
+            print request.zoneVar
             print pathList
             return f(self, request, pathList)
         return initPages
