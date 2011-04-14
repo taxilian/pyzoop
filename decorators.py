@@ -20,7 +20,6 @@ class urlVars(object):
     def __call__(self, f):
         vars, include, exclude = self.vars, self.include, self.exclude
         def initPages(self, request, pathList):
-            print pathList
             if not pathList or (exclude and pathList and pathList[0] in exclude) or (include and pathList[0] not in include):
                 return f(self, request, pathList)
             if len(pathList) >= vars:
@@ -31,8 +30,20 @@ class urlVars(object):
             for v in vars:
                 pass
                 request.zoneVar[v] = pathList.pop(0)
-            print request.zoneVar
-            print pathList
             return f(self, request, pathList)
         return initPages
 
+class extractVar(object):
+    def __init__(self, count=1):
+        self.count = count
+
+    def __call__(self, f):
+        count = self.count
+        def page_handler(self, request, pathList):
+            if count > len(pathList):
+                raise Http404
+            pathList = pathList[:]
+            pathArgs = pathList[1:count+1]
+            pathList[1:count+1] = []
+            return f(self, request, pathList, *pathArgs)
+        return page_handler
