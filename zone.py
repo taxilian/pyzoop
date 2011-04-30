@@ -19,7 +19,7 @@ class zone(object):
     def templateVars(self): return self.__templateVars
 
     def handleRequest(self, request, path):
-        self.__templateVars["user"] = request.user
+        if hasattr(request, "user"): self.__templateVars["user"] = request.user
         self.__templateVars["get"] = request.GET
         self.__templateVars["post"] = request.POST
         self.__templateVars["BASE_URL"] = settings.BASE_URL
