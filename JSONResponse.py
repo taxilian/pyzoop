@@ -53,7 +53,6 @@ class JSONResponse(HttpResponse):
         """
         if content:
             content = serialize_to_json(content,**json_opts)
-            print content
         else:
             content = serialize_to_json([],**json_opts)
         super(JSONResponse,self).__init__(content,mimetype,status=status,*args,**kwargs)
@@ -64,7 +63,6 @@ def ReturnsJSON(f):
         if isinstance(resp, HttpResponse):
             return resp
         else:
-            print "JSON response:", resp
             return JSONResponse(resp)
     wrapper.__name__ = f.__name__ + "__json";
     return wrapper

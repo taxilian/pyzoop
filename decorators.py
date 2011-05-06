@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required as django_login_required
 from django.http import Http404
+from django.utils import simplejson
 
 def login_required(f):
    def page_func(self, request, *args, **kwargs):
@@ -47,3 +48,9 @@ class extractVar(object):
             pathList[1:count+1] = []
             return f(self, request, pathList, *pathArgs)
         return page_handler
+
+def AcceptsJSON(f):
+    def page_handler(self, request, pathList):
+        json_doc = simplejson.loads(request.raw_post_data)
+        return f(self, request, pathList, json_doc)
+    return page_handler

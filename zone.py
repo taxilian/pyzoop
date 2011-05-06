@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.conf import settings
+from django.http import Http404
 from ZincError import *
 
 class zone(object):
@@ -109,6 +110,7 @@ class zone(object):
     def page_default(self, request, pathList):
         raise Http404
 
-    def render_to_response(self, template, vmap):
+    def render_to_response(self, template, vmap=None):
+        vmap = vmap or {}
         self.templateVars.update(vmap)
         return render_to_response(template, self.templateVars)
