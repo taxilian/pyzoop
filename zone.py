@@ -25,6 +25,7 @@ class zone(object):
         self.__templateVars["post"] = request.POST
         self.__templateVars["BASE_URL"] = settings.BASE_URL
         self.__templateVars["MEDIA_URL"] = settings.MEDIA_URL
+        self.__templateVars["request"] = request
         if len(path) > 0:
             pathList = path.split("/")
         else:
