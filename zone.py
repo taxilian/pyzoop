@@ -8,7 +8,7 @@ from ZincError import *
 class zone(object):
     __metaclass__ = ABCMeta
     """
-    Base class for PyZinc Zones
+    Base class for PyZoop Zones
     """
     def __init__(self, **childZones):
         # initialize any zones that were provided
