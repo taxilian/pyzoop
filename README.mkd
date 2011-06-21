@@ -1,0 +1,96 @@
+PyZoop
+======
+
+PyZoop is not (and never will be) a complete port of the PHP Zoop Framework. Instead, it is a port of the most fundamental piece of that framework: the Zone structure.
+
+PyZoop zones are designed to be used with Django, though they could likely be easily adapted to work with any python web programming framework.
+
+Intent
+======
+
+PyZoop ties into and partially replaces the standard urls.py routing that Django comes with. It is my belief that while configured routing is useful when making modular
+things, it's pretty much a pain in the neck when you're just trying to write related code. PyZoop favors and enables the 
+[Convention over Configuration model](http://en.wikipedia.org/wiki/Convention_over_configuration) model by enabling programmers to define multiple pages within a logical "zone".
+
+Example
+=======
+
+An example zoneDefault from one of my projects has been included for reference. Check out the "examples" directory.
+
+Adding Zoop to your project
+========================
+
+Currently pyzoop changes enough that we haven't bothered making a real python module out of it. It is currently just being used as a git submodule in a django project:
+
+    git submodule add git://github.com/taxilian/pyzoop.git
+
+Adding the configuration for your django project to use pyzoop is very easy. Simply add a line to your urls.py file, like so:
+
+    url(r'^(?P<path>.*)', "hamstudy.views.pageHandler", name="hamstudy"),
+
+Obviously you'll need to adjust the class paths to match your app. The full file used in my example project is this:
+
+    import os
+    from settings import *
+    from django.conf.urls.defaults import *
+
+    # Uncomment the next two lines to enable the admin:
+    # from django.contrib import admin
+     thin# admin.autodiscover()
+
+    urlpatterns = patterns('',
+        # Static content
+        (r'^public/(?P<path>.*)$', 'django.views.static.serve',
+            {"document_root": os.path.join(PROJECT_PATH, "templates", "public")}
+            ),
+        # Zinc calls
+        url(r'^(?P<path>.*)', "hamstudy.views.pageHandler", name="hamstudy"),
+    )
+
+If you use django's url resolution tools inside your zones you can put whatever prefix you want at the beginning of the url and everything should still work fine.
+
+The second part is to add the pageHandler method to your views.py file:
+
+    from hamstudy.zones.zoneDefault import zoneDefault
+
+    def pageHandler(request, path):
+        zone = zoneDefault()
+        return zone.handleRequest(request, path)
+
+I store my zones in a zones/ subdirectory (remember `__init__.py`!) in my site for simplicity, but that's up to you. You can name the zones whatever you want;
+whichever you call from pageHandler will be your root zone.
+
+Zone Methods
+============
+
+There are certain "special" methods on the zone class (the base class of all zones) that you should be aware of:
+
+Note that if any of these return a HttpResponse it will halt processing at that point and return the response; this is really useful for authentication or permissions enforcement,
+because you can pick the point at which you want to check it. In the case of "after" or "close" methods that run after the request is handled the response can be overridden by
+returning a different one.
+
+* initZone(self, request, pathList) - this is called when a request on the zone is made (even if it gets routed to a subzone)
+* beforeSubZone(self, request, pathList, subZone) - this is called right before a request is routed to a subzone
+* afterSubZone(self, request, pathList, subZone, response) - this is called right after a request is handled by a subzone
+* initPages(self, request, pathList) - this is called before a page or post handler on the current zone is called
+* closePages(self, request, pathList, response) - this is called after a page or post handler on the current zone handles the request
+
+For pages:
+
+* page_index(self, request, pathList) - called when no extra path info is found
+* page_default(self, request, pathList) - called when no matching page or post handler is found but path data is found
+
+* page_[name](self, request, pathList) - called when the next item in the path is [name] and method is GET or no post_[name] exists
+* post_[anme](self, request, pathList) - called when the next item in the path is [name] and method is POST
+
+
+Decorators
+==========
+
+TODO: add docs
+
+* login_requred
+* urlVars
+* extractVar
+* AcceptsJSON
+* ReturnsJSON

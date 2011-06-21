@@ -20,6 +20,12 @@ class zone(object):
     def templateVars(self): return self.__templateVars
 
     def handleRequest(self, request, path):
+        """
+        handleRequest is called to route the request to the correct page or subzone
+
+        path should contain all additional PATH_INFO after the "root", not including
+        an initial /
+        """
         if hasattr(request, "user"): self.__templateVars["user"] = request.user
         self.__templateVars["get"] = request.GET
         self.__templateVars["post"] = request.POST
@@ -93,16 +99,44 @@ class zone(object):
 
     @abstractmethod
     def initZone(self, request, pathList):
+        """
+        This is called when a request on this zone is made, even
+        if the request is routed to a subzone
+        If a HttpResponse is returned processing will end without any
+        additional routing being done
+
+        This is particularly useful for enforcing permissions or authentication
+        """
         pass
 
     def beforeSubZone(self, request, pathList, subZone):
+        """
+        This is called right before the request is routed to a subzone.
+        If a HttpResponse is returned processing will end without any
+        additional routing being done
+
+        This is particularly useful for enforcing permissions or authentication
+        """
         pass
 
     def afterSubZone(self, request, pathList, subZone, response):
+        """
+        This is called right after the request is handled by a subzone.
+        If a HttpResponse is returned it will be used insetad of the
+        response returned by the subzone
+        """
         pass
 
     @abstractmethod
     def initPages(self, request, pathList):
+        """
+        This is called right before the request is routed to a page (or post handler)
+        on the current zone. It is not called when a request is routed to a subzone.
+        If a HttpResponse is returned processing will end without any
+        additional routing being done or any pages being called.
+
+        This is particularly useful for enforcing permissions or authentication
+        """
         pass
 
     def closePages(self, request, pathList, response):
