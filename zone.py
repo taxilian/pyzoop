@@ -45,6 +45,7 @@ class zone(object):
         if hasattr(self, "zone_%s" % pathList[0]):
             try:
                 subZone = getattr(self, "zone_%s" % pathList[0])
+                subZone.templateVars.update(self.templateVars)
                 r = self.beforeSubZone(subZone, request, pathList)
                 if isinstance(r, HttpResponse):
                     return r
