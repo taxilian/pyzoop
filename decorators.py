@@ -30,6 +30,9 @@ class urlVars(object):
                 request.zoneVar = {}
             for v in vars:
                 request.zoneVar[v] = pathList.pop(0)
+
+            if len(pathList) == 0:
+                pathList.append("index")
             return f(self, request, pathList)
         return initPages
 
