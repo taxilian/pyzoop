@@ -21,15 +21,14 @@ class urlVars(object):
     def __call__(self, f):
         vars, include, exclude = self.vars, self.include, self.exclude
         def initPages(self, request, pathList):
+            print pathList
             if not pathList or (exclude and pathList and pathList[0] in exclude) or (include and pathList[0] not in include):
                 return f(self, request, pathList)
-            if len(pathList) >= vars:
+            if len(pathList) < len(vars):
                 raise Http404
             if not hasattr(request, "zone"):
-                pass
                 request.zoneVar = {}
             for v in vars:
-                pass
                 request.zoneVar[v] = pathList.pop(0)
             return f(self, request, pathList)
         return initPages

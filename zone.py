@@ -66,18 +66,21 @@ class zone(object):
         if isinstance(r, HttpResponse):
             return r
 
-        # handle POST requests
+        # handle requests with other methods
         if request.method == "POST":
-            if hasattr(self, "post_%s" % pathList[0]):
-                member = getattr(self, "post_%s" % pathList[0])
-            elif hasattr(self, "post_default"):
-                member = self.post_default
-            elif hasattr(self, "page_%s" % pathList[0]):
-                member = getattr(self, "page_%s" % pathList[0])
-            else:
-                member = self.page_default
+            pageType = "post"
+        elif request.method == "DELETE":
+            pageType = "delete"
+        elif request.method == "PUT":
+            pageType = "put"
+        else:
+            pageType = "page"
 
-        elif pathList and hasattr(self, "page_%s" % pathList[0]):
+        if hasattr(self, "%s_%s" % (pageType, pathList[0])):
+            member = getattr(self, "%s_%s" % (pageType, pathList[0]))
+        elif hasattr(self, "%s_default" % pageType):
+            member = getattr(self, "%s_default" % pageType)
+        elif hasattr(self, "page_%s" % pathList[0]):
             member = getattr(self, "page_%s" % pathList[0])
         else:
             member = self.page_default
