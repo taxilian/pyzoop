@@ -21,7 +21,8 @@ class urlVars(object):
     def __call__(self, f):
         vars, include, exclude = self.vars, self.include, self.exclude
         def initPages(self, request, pathList):
-            print pathList
+            if not hasattr(request, "zone"):
+                request.zoneVar = {}
             if not pathList or (exclude and pathList and pathList[0] in exclude) or (include and pathList[0] not in include):
                 return f(self, request, pathList)
             if len(pathList) < len(vars):
